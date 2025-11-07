@@ -1,4 +1,4 @@
-package com.agiotagemltda.megusta.data
+package com.agiotagemltda.megusta.di
 
 import com.agiotagemltda.megusta.domain.model.Post
 
