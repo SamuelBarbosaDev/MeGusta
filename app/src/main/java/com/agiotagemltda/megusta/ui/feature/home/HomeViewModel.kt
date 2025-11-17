@@ -126,7 +126,12 @@ class HomeViewModel @Inject constructor(
         _uiState.update { state ->
             val allIds = state.posts.map { it.post.id }.toSet()
             state.copy(selectedPostIds = allIds)
-//            state.copy(selectAll = true)
+        }
+    }
+
+    fun unselectAllPost(){
+        _uiState.update { state ->
+            state.copy(selectedPostIds = emptySet())
         }
     }
 
@@ -135,7 +140,6 @@ class HomeViewModel @Inject constructor(
             val selectedIds = _uiState.value.selectedPostIds.toList()
             if (selectedIds.isEmpty()) {
                 exitSelectionMode()
-//                return@launch
             }
 
             _uiState.update { it.copy(isLoading = true) }

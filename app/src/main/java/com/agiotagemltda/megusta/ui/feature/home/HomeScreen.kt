@@ -1,8 +1,10 @@
 package com.agiotagemltda.megusta.ui.feature.home
 
+import android.R
 import android.net.Uri
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -26,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -72,7 +75,7 @@ fun HomeScreen(
                             )
                             Text(
                                 "$selectedCount Selecionado(s)",
-                                style = MaterialTheme.typography.titleSmall
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
 
@@ -82,19 +85,25 @@ fun HomeScreen(
 //                    },
                     actions = {
                         if (uiState.posts.isNotEmpty()) {
-                            TextButton(onClick = { viewModel.selectAllPosts() }) {
+                            Row (verticalAlignment = Alignment.CenterVertically){
                                 Text(
-                                    "Selecionar todos",
-                                    style = MaterialTheme.typography.bodySmall
+                                    "Todos",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
-//                                Checkbox(
-//                                    uiState.selectAll,
-//                                    onCheckedChange = { checked ->
-//                                        uiState.selectAll = checked
-//                                    }
-//                                )
+                                Checkbox(
+                                    checked = uiState.selectedPostIds.size == uiState.posts.size,
+                                    onCheckedChange = { change ->
+                                        if (change){
+                                            viewModel.selectAllPosts()
+                                        } else {
+                                            viewModel.unselectAllPost()
+                                        }
+                                    }
+                                )
+
                             }
-                        }
+                            }
                     }
 
                 )
