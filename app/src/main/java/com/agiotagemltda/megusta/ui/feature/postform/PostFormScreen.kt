@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -70,30 +71,15 @@ fun PostFormScreen(
             }
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(20.dp)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            OutlinedTextField(
-                value = uiState.name,
-                onValueChange = {viewModel.updateName(it) },
-                label = { Text("Nome") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !uiState.isLoading
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
+        Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp))
+//                    .clip(RoundedCornerShape(12.dp))
                     .background(Color.LightGray)
                     .clickable{pickImage()}
-                    .border(2.dp, Color.Gray.copy(0.3f), RoundedCornerShape(12.dp))
+//                    .border(2.dp, Color.Gray.copy(0.3f), RoundedCornerShape(12.dp))
             ){
                 when{
                     uiState.imageUri != null -> {
@@ -133,38 +119,56 @@ fun PostFormScreen(
                     }
                 }
             }
-
-            OutlinedTextField(
-                value = uiState.tagsInput,
-                onValueChange = { viewModel.updateTags(it) },
-                label = { Text("Tags") },
-                placeholder = { Text("ex: Ação, Anime, Ficção") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !uiState.isLoading
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = uiState.url,
-                onValueChange = { viewModel.updateUrl(it) },
-                label = { Text("URL") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !uiState.isLoading
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = uiState.notes,
-                onValueChange = { viewModel.updateNotes(it) },
-                label = { Text("Anotações") },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                enabled = !uiState.isLoading
-            )
+                    .padding(innerPadding)
+                    .padding(horizontal = 20.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                OutlinedTextField(
+                    value = uiState.name,
+                    onValueChange = {viewModel.updateName(it) },
+                    label = { Text("Nome") },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isLoading
+                )
+                Spacer(modifier = Modifier.height(8.dp))
 
-            if (uiState.isLoading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(
+                    value = uiState.tagsInput,
+                    onValueChange = { viewModel.updateTags(it) },
+                    label = { Text("Tags") },
+                    placeholder = { Text("ex: Ação, Anime, Ficção") },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isLoading
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = uiState.url,
+                    onValueChange = { viewModel.updateUrl(it) },
+                    label = { Text("URL") },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isLoading
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = uiState.notes,
+                    onValueChange = { viewModel.updateNotes(it) },
+                    label = { Text("Anotações") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    enabled = !uiState.isLoading,
+                    minLines = 4,
+                    maxLines = Int.MAX_VALUE,
+                )
+
+                if (uiState.isLoading) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
             }
         }
     }

@@ -51,4 +51,11 @@ class PostRepository(private val postDao: PostDao){
     suspend fun deletePost(postId: Long){
         postDao.deletePost(postId)
     }
+
+    suspend fun deleteTagById(tagId: Long){
+        postDao.deleteTagAndCrossRefs(tagId)
+    }
+
+    fun getAllTagsWithIdFlow(): Flow<List<TagsEntity>> =
+        postDao.getAllTagsWithIdFLow()
 }

@@ -89,4 +89,19 @@ interface PostDao{
 
     @Query("DELETE FROM posts WHERE id = :postId")
     suspend fun deletePost(postId: Long)
+
+    @Query("DELETE FROM post_tag_cross_ref WHERE tagId = :tagId")
+    suspend fun deleteCrossRefByTagId(tagId: Long)
+
+    @Query("DELETE FROM tags WHERE id = :tagId")
+    suspend fun deleteTagById(tagId: Long)
+
+    @Transaction
+    suspend fun deleteTagAndCrossRefs(tagId: Long){
+        deleteCrossRefByTagId(tagId)
+        deleteTagById(tagId)
+    }
+
+    @Query("SELECT * FROM tags ORDER BY name ASC")
+    fun getAllTagsWithIdFLow(): Flow<List<TagsEntity>>
 }

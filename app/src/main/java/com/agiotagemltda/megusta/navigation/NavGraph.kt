@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.agiotagemltda.megusta.ui.feature.add.AddPostViewModel
 import com.agiotagemltda.megusta.ui.feature.home.HomeScreen
+import com.agiotagemltda.megusta.ui.feature.managetags.ManageTagsScreen
 import com.agiotagemltda.megusta.ui.feature.postform.EditPostViewModel
 import com.agiotagemltda.megusta.ui.feature.postform.PostFormScreen
 
@@ -88,6 +89,10 @@ fun AppNavGraph(navController: NavHostController) {
             }
 
             PostFormScreen(navController, viewModel, isEditMode = true)
+        }
+
+        composable ("manage_tags"){
+            ManageTagsScreen(navController)
         }
     }
 }

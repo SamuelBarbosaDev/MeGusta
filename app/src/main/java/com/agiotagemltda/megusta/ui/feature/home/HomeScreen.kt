@@ -66,7 +66,7 @@ fun HomeScreen(
             if (isSelectionMode) {
                 TopAppBar(
                     title = {
-                        TextButton(onClick = { viewModel.exitSelectionMode() }){
+                        TextButton(onClick = { viewModel.exitSelectionMode() }) {
                             Icon(
                                 Icons.Default.Close,
                                 "Sair",
@@ -84,8 +84,11 @@ fun HomeScreen(
 //                        Icon(Icons.Default.Close, "Sair")
 //                    },
                     actions = {
+//                        if (uiState.isSelectionMode){
+
+//                        }
                         if (uiState.posts.isNotEmpty()) {
-                            Row (verticalAlignment = Alignment.CenterVertically){
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     "Todos",
                                     style = MaterialTheme.typography.bodySmall,
@@ -94,7 +97,7 @@ fun HomeScreen(
                                 Checkbox(
                                     checked = uiState.selectedPostIds.size == uiState.posts.size,
                                     onCheckedChange = { change ->
-                                        if (change){
+                                        if (change) {
                                             viewModel.selectAllPosts()
                                         } else {
                                             viewModel.unselectAllPost()
@@ -103,7 +106,7 @@ fun HomeScreen(
                                 )
 
                             }
-                            }
+                        }
                     }
 
                 )
@@ -144,6 +147,13 @@ fun HomeScreen(
                 selectedTag = uiState.selectedTag ?: "Todos",
                 onTagSelected = { viewModel.filterByTag(it) }
             )
+            TextButton(
+                onClick = {
+                    navController.navigate("manage_tags")
+                }
+            ) {
+                Text("Tags")
+            }
             // Lista de posts
             PostList(
                 posts = uiState.posts,
