@@ -77,7 +77,7 @@ fun PostCard(
             model = when {
                 post.image.startsWith("http") -> post.image
                 post.image.isNotBlank() -> File(post.image)
-                else -> R.drawable.nano_machine
+                else -> R.drawable.no_image
             },
             contentDescription = null,
             contentScale = ContentScale.Crop,

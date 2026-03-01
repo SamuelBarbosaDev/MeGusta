@@ -30,6 +30,7 @@ import androidx.navigation.NavController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -119,9 +120,9 @@ private fun TagItem(
     Card (
         colors = CardDefaults.cardColors(
             contentColor = if(isSelected)
-                MaterialTheme.colorScheme.primaryContainer
+                MaterialTheme.colorScheme.primary
             else
-                MaterialTheme.colorScheme.surfaceVariant
+                Color.White
         ),
         onClick = onClick,
         modifier = Modifier

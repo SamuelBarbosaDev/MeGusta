@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -145,15 +146,9 @@ fun HomeScreen(
             TagFilterChips(
                 tags = listOf("Todos") + uiState.tags,
                 selectedTag = uiState.selectedTag ?: "Todos",
-                onTagSelected = { viewModel.filterByTag(it) }
+                onTagSelected = { viewModel.filterByTag(it) },
+                navController
             )
-            TextButton(
-                onClick = {
-                    navController.navigate("manage_tags")
-                }
-            ) {
-                Text("Tags")
-            }
             // Lista de posts
             PostList(
                 posts = uiState.posts,
