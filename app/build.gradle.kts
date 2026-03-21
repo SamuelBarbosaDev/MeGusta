@@ -63,6 +63,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.material3)
     ksp(libs.hilt.android.compiler)  // AGORA FUNCIONA!
     implementation(libs.hilt.navigation.compose)
 
@@ -91,4 +92,12 @@ dependencies {
 
     //Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Markdown
+    implementation("com.github.jeziellago:compose-markdown:0.5.0")
+
+    // Ícones padrão do Material Design
+    implementation("androidx.compose.material:material-icons-core")
+    // Ícones adicionais (Edit, Favorite, etc., costumam estar aqui)
+    implementation("androidx.compose.material:material-icons-extended")
 }

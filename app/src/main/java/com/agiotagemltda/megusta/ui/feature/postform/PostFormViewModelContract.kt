@@ -12,4 +12,5 @@ interface PostFormViewModelContract {
     fun updateImageUri(uri: Uri?)
     fun updateNotes(notes: String)
     fun savePost()
+    fun togglePreviewMode()
 }

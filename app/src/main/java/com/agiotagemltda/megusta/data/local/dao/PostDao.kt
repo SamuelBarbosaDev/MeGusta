@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PostDao{
     @Transaction
-    @Query("SELECT * FROM posts")
+    @Query("SELECT * FROM posts ORDER BY id DESC")
     fun getAllPostsWithTagsFlow(): Flow<List<PostWithTags>>
 
     @Insert

@@ -1,6 +1,7 @@
 package com.agiotagemltda.megusta.ui.components
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -121,9 +122,18 @@ fun PostCard(
             LazyRow(modifier = Modifier.align(Alignment.TopEnd)) {
                 items(tags.take(3)) { tag ->
                     AssistChip(
-                        onClick = {},
+                        onClick = {viewModel.filterByTag(tag)},
                         label = { Text(tag, fontSize = 10.sp) },
-                        modifier = Modifier.padding(end = 4.dp, top = 8.dp)
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = Color.Black.copy(alpha = .7f),
+                            labelColor = Color.White,
+                        ),
+                        border = AssistChipDefaults.assistChipBorder(
+                            enabled = true,
+                            borderColor = Color.White.copy(alpha = .3f)
+                        ),
+                        modifier = Modifier
+                            .padding(end = 4.dp, top = 8.dp)
                     )
                 }
                 if (tags.size > 3) {

@@ -118,4 +118,8 @@ class EditPostViewModel @AssistedInject constructor(
             _uiState.update { it.copy(isSaved = true, isLoading = false) }
         }
     }
+
+    override fun togglePreviewMode() {
+        _uiState.update { it.copy(isPreviewMode = !it.isPreviewMode) }
+    }
 }

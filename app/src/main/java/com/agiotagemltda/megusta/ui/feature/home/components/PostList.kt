@@ -58,7 +58,7 @@ fun PostList(
                 tags = posts.tag.map { it.name },
                 viewModel = viewModel,
                 navController = navController,
-                isSelected =isSelected
+                isSelected =isSelected,
             )
         }
     }

@@ -19,6 +19,12 @@ import javax.inject.Inject
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ApplicationContext
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.agiotagemltda.megusta.data.local.entity.TagsEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 
 data class PostFormUiState(
@@ -31,7 +37,9 @@ data class PostFormUiState(
     val notes: String = "",
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val isPreviewMode: Boolean = false,
+    val allAvailableTags: List<String> = emptyList()
 )
 
 
@@ -46,12 +54,31 @@ class PostFormViewModel @AssistedInject constructor(
 
     init {
         if (postId > 0) loadPost(postId)
+        repository.getAllTagsFlow
+            .onEach { tags ->
+                _uiState.update {
+                    it.copy(allAvailableTags = tags)
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     @AssistedFactory
     interface Factory {
         fun create(postId: Long): PostFormViewModel
     }
+
+//    private fun observeTags() {
+//        viewModelScope.launch {
+//            repository.getAllTagsFlow // Certifique-se que no repositório este Flow retorna List<String>
+//                .catch { e ->
+//                    _uiState.update { it.copy(error = e.message) }
+//                }
+//                .collect { tags ->
+//                    _uiState.update { it.copy(allAvailableTags = tags) }
+//                }
+//        }
+//    }
 
     fun loadPost(postId: Long) {
         if (postId <= 0) return
@@ -87,7 +114,10 @@ class PostFormViewModel @AssistedInject constructor(
     override fun updateImage(image: String) = _uiState.update { it.copy(image = image) }
     override fun updateImageUri(uri: Uri?) = _uiState.update { it.copy(imageUri = uri) }
     override fun updateNotes(notes: String) = _uiState.update { it.copy(notes = notes) }
-
+    // Dentro do seu ViewModel
+    override fun togglePreviewMode() {
+        _uiState.update { it.copy(isPreviewMode = !it.isPreviewMode) }
+    }
     override fun savePost() {
         val state = _uiState.value
         if (state.name.isBlank()) return
