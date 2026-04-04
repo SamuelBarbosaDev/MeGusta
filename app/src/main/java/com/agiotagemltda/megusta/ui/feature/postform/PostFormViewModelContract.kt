@@ -13,4 +13,5 @@ interface PostFormViewModelContract {
     fun updateNotes(notes: String)
     fun savePost()
     fun togglePreviewMode()
+    fun savePostTogglePreviewMode()
 }

@@ -118,6 +118,45 @@ class PostFormViewModel @AssistedInject constructor(
     override fun togglePreviewMode() {
         _uiState.update { it.copy(isPreviewMode = !it.isPreviewMode) }
     }
+
+    override fun savePostTogglePreviewMode() {
+        val state = _uiState.value
+        if (state.name.isBlank()) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            val tags = state.tagsInput.split(",")
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+
+            val imagePath = if (state.imageUri != null) {
+                copyImageToInternalStorage(context, state.imageUri!!) ?: state.image
+            } else {
+                state.image // mantém URL ou caminho antigo
+            }
+
+            if (state.postId > 0) {
+                repository.updatePostWithTags(
+                    postId = state.postId,
+                    name = state.name,
+                    notes = state.notes,
+                    url = state.url,
+                    image = imagePath, // ← AQUI!
+                    tags = tags
+                )
+            } else {
+                repository.insertPostWithTags(
+                    name = state.name,
+                    notes = state.notes,
+                    url = state.url,
+                    image = imagePath, // ← AQUI!
+                    tags = tags
+                )
+            }
+            _uiState.update { it.copy(isLoading = false) }
+        }
+    }
     override fun savePost() {
         val state = _uiState.value
         if (state.name.isBlank()) return

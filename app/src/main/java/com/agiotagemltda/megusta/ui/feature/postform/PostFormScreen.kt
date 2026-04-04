@@ -97,7 +97,10 @@ fun PostFormScreen(
                 title = { Text(if (uiState.isPreviewMode) "Visualização" else if (isEditMode) "Editar" else "Novo Post") },
                 actions = {
                     // Botão para alternar entre Edição e Preview
-                    IconButton(onClick = { viewModel.togglePreviewMode() }) {
+                    IconButton(onClick = {
+                        viewModel.togglePreviewMode()
+                        viewModel.savePostTogglePreviewMode()
+                    }) {
                         Icon(
                             imageVector = if (uiState.isPreviewMode) Icons.Default.Edit else Icons.Default.Visibility,
                             contentDescription = "Alternar Preview"
@@ -195,7 +198,6 @@ fun EditorLayout(
 //                modifier = Modifier.fillMaxWidth(),
 //                enabled = !uiState.isLoading
 //            )
-            Text(uiState.allAvailableTags.joinToString())
             TagSelector(
                 currentTags = uiState.tagsInput,
                 availableTags = uiState.allAvailableTags,

@@ -66,6 +66,10 @@ class AddPostViewModel @Inject constructor(
     override fun togglePreviewMode() {
         _uiState.update { it.copy(isPreviewMode = !it.isPreviewMode) }
     }
+
+    override fun savePostTogglePreviewMode() {
+        TODO("Not yet implemented")
+    }
 }
 
 //import androidx.lifecycle.ViewModel
