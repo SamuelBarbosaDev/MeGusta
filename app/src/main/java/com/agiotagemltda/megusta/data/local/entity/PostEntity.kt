@@ -14,4 +14,5 @@ data class PostEntity(
     val notes: String,
     val url: String,
     val image: String,
+    val rating: Int = 0 // 0: nenhum, 1: gostei, 2: não gostei
 )

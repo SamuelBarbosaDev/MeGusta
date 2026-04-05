@@ -30,9 +30,10 @@ class PostRepository(private val postDao: PostDao){
         notes: String,
         url: String,
         image: String,
-        tags: List<String>
+        tags: List<String>,
+        rating: Int = 0
     ) {
-        val post = PostEntity(name = name, notes = notes, url = url, image = image)
+        val post = PostEntity(name = name, notes = notes, url = url, image = image, rating = rating)
         postDao.insertPostWithTags(post, tags) // ← INSERT
     }
 
@@ -42,9 +43,10 @@ class PostRepository(private val postDao: PostDao){
         notes: String,
         url: String,
         image: String,
-        tags: List<String>
+        tags: List<String>,
+        rating: Int
     ) {
-        val post = PostEntity(id = postId, name = name, notes = notes, url = url, image = image)
+        val post = PostEntity(id = postId, name = name, notes = notes, url = url, image = image, rating = rating)
         postDao.updatePostWithTags(post, tags)
     }
 

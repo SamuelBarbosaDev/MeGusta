@@ -2,6 +2,8 @@ package com.agiotagemltda.megusta.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.agiotagemltda.megusta.data.local.AppDatabase
 import com.agiotagemltda.megusta.data.local.dao.PostDao
 import dagger.Module
@@ -23,7 +25,8 @@ object DatabaseModule {
             AppDatabase::class.java,
             "megusta_database"
         )
-            .fallbackToDestructiveMigration(dropAllTables = true)
+//            .fallbackToDestructiveMigration(dropAllTables = true)<- REMOVA OU COMENTE ESTA LINHA
+//            .addMigrations(MIGRATION_1_2) // <- VAMOS CRIAR ISSO AGORA
             .build()
     }
 
@@ -31,3 +34,10 @@ object DatabaseModule {
     @Singleton
     fun providePostDao(database: AppDatabase): PostDao = database.postDao()
 }
+
+//val MIGRATION_1_2 = object : Migration(1, 2) {
+//    override fun migrate(db: SupportSQLiteDatabase) {
+//        // Comando SQL para adicionar a coluna sem apagar a tabela
+//        db.execSQL("ALTER TABLE posts ADD COLUMN rating INTEGER NOT NULL DEFAULT 0")
+//    }
+//}

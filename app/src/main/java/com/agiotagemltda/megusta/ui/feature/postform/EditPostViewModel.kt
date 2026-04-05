@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -44,7 +46,8 @@ class EditPostViewModel @AssistedInject constructor(
                         tagsInput = postWithTags.tag.joinToString(", ") { it.name },
                         url = postWithTags.post.url,
                         image = postWithTags.post.image,
-                        notes = postWithTags.post.notes
+                        notes = postWithTags.post.notes,
+                        rating = postWithTags.post.rating
                     )
                 }
             } catch (e: Exception) {
@@ -55,7 +58,11 @@ class EditPostViewModel @AssistedInject constructor(
             val postId = savedStateHandle.get<Long>("postId") ?: 0L
             if (postId > 0) loadPost(postId)
         }
-
+        repository.getAllTagsFlow
+            .onEach { tags ->
+                _uiState.update { it.copy(allExistingTags = tags) }
+            }
+            .launchIn(viewModelScope)
 //        loadPost(postId)
     }
 
@@ -79,6 +86,7 @@ class EditPostViewModel @AssistedInject constructor(
                                 url = pwt.post.url,
                                 image = pwt.post.image,
                                 notes = pwt.post.notes,
+                                rating = pwt.post.rating,
                                 isLoading = false
                             )
                         }
@@ -93,6 +101,7 @@ class EditPostViewModel @AssistedInject constructor(
     override fun updateImage(image: String) = _uiState.update { it.copy(image = image) }
     override fun updateImageUri(uri: Uri?) = _uiState.update { it.copy(imageUri = uri) }
     override fun updateNotes(notes: String) = _uiState.update { it.copy(notes = notes) }
+    override fun updateRating(newRating: Int) = _uiState.update { it.copy(rating = newRating) }
 
 
     override fun savePost() {
@@ -114,7 +123,8 @@ class EditPostViewModel @AssistedInject constructor(
                 notes = state.notes,
                 url = state.url,
                 image = imagePath,
-                tags = tags
+                tags = tags,
+                rating = state.rating
             )
             _uiState.update { it.copy(isSaved = true, isLoading = false) }
         }
@@ -148,7 +158,8 @@ class EditPostViewModel @AssistedInject constructor(
                     notes = state.notes,
                     url = state.url,
                     image = imagePath, // ← AQUI!
-                    tags = tags
+                    tags = tags,
+                    rating = state.rating
                 )
             } else {
                 repository.insertPostWithTags(
@@ -156,10 +167,39 @@ class EditPostViewModel @AssistedInject constructor(
                     notes = state.notes,
                     url = state.url,
                     image = imagePath, // ← AQUI!
-                    tags = tags
+                    tags = tags,
+                    rating = state.rating
                 )
             }
             _uiState.update { it.copy(isLoading = false) }
+        }
+    }
+    // 3. ADICIONE ESTAS FUNÇÕES (copie da PostFormViewModel)
+    override fun onNewTagContentChange(newValue: String) {
+        _uiState.update { it.copy(newTagInput = newValue) }
+    }
+
+    override fun toggleTagSelection(tag: String) {
+        _uiState.update { state ->
+            val currentList = state.tagsInput.split(",")
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+                .toMutableList()
+
+            if (currentList.contains(tag)) {
+                currentList.remove(tag)
+            } else {
+                currentList.add(tag)
+            }
+            state.copy(tagsInput = currentList.joinToString(", "))
+        }
+    }
+
+    override fun addNewTag() {
+        val tag = _uiState.value.newTagInput.trim()
+        if (tag.isNotBlank()) {
+            toggleTagSelection(tag)
+            _uiState.update { it.copy(newTagInput = "") }
         }
     }
 }

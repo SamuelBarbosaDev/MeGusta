@@ -35,11 +35,14 @@ data class PostFormUiState(
     val image: String = "",
     val imageUri: Uri? = null,
     val notes: String = "",
+    val rating: Int = 0,
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
     val error: String? = null,
     val isPreviewMode: Boolean = false,
-    val allAvailableTags: List<String> = emptyList()
+    val allAvailableTags: List<String> = emptyList(),
+    val allExistingTags: List<String> = emptyList(), // Novas tags para sugestão
+    val newTagInput: String = "" // Texto que o usuário está digitando
 )
 
 
@@ -54,10 +57,17 @@ class PostFormViewModel @AssistedInject constructor(
 
     init {
         if (postId > 0) loadPost(postId)
+//        repository.getAllTagsFlow
+//            .onEach { tags ->
+//                _uiState.update {
+//                    it.copy(allAvailableTags = tags)
+//                }
+//            }
+//            .launchIn(viewModelScope)
         repository.getAllTagsFlow
             .onEach { tags ->
                 _uiState.update {
-                    it.copy(allAvailableTags = tags)
+                    it.copy(allExistingTags = tags) // Preenche a lista de sugestões
                 }
             }
             .launchIn(viewModelScope)
@@ -98,6 +108,7 @@ class PostFormViewModel @AssistedInject constructor(
                                 url = pwt.post.url,
                                 image = pwt.post.image,
                                 notes = pwt.post.notes,
+                                rating = pwt.post.rating,
                                 isLoading = false
                             )
                         }
@@ -114,9 +125,44 @@ class PostFormViewModel @AssistedInject constructor(
     override fun updateImage(image: String) = _uiState.update { it.copy(image = image) }
     override fun updateImageUri(uri: Uri?) = _uiState.update { it.copy(imageUri = uri) }
     override fun updateNotes(notes: String) = _uiState.update { it.copy(notes = notes) }
+    override fun updateRating(newRating: Int) = _uiState.update { it.copy(rating = newRating) }
     // Dentro do seu ViewModel
     override fun togglePreviewMode() {
         _uiState.update { it.copy(isPreviewMode = !it.isPreviewMode) }
+    }
+
+    // Atualiza o que o usuário digita no campo de nova tag
+    override fun onNewTagContentChange(newValue: String) {
+        _uiState.update { it.copy(newTagInput = newValue) }
+    }
+
+    // Quando o usuário clica em um Chip ou digita e aperta "Enter"
+    override fun toggleTagSelection(tag: String) {
+        _uiState.update { state ->
+            // Pega as tags atuais (que estão no campo de texto tagsInput separadas por vírgula)
+            val currentList = state.tagsInput.split(",")
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+                .toMutableList()
+
+            if (currentList.contains(tag)) {
+                currentList.remove(tag) // Deseleciona
+            } else {
+                currentList.add(tag) // Seleciona
+            }
+
+            // Devolve para o campo de texto formatado
+            state.copy(tagsInput = currentList.joinToString(", "))
+        }
+    }
+
+    // Função para o botão "+" ou Tecla Enter do teclado
+    override fun addNewTag() {
+        val tag = _uiState.value.newTagInput.trim()
+        if (tag.isNotBlank()) {
+            toggleTagSelection(tag)
+            _uiState.update { it.copy(newTagInput = "") } // Limpa o campo após adicionar
+        }
     }
 
     override fun savePostTogglePreviewMode() {
@@ -143,7 +189,8 @@ class PostFormViewModel @AssistedInject constructor(
                     notes = state.notes,
                     url = state.url,
                     image = imagePath, // ← AQUI!
-                    tags = tags
+                    tags = tags,
+                    rating = state.rating
                 )
             } else {
                 repository.insertPostWithTags(
@@ -151,7 +198,8 @@ class PostFormViewModel @AssistedInject constructor(
                     notes = state.notes,
                     url = state.url,
                     image = imagePath, // ← AQUI!
-                    tags = tags
+                    tags = tags,
+                    rating = state.rating
                 )
             }
             _uiState.update { it.copy(isLoading = false) }
@@ -181,7 +229,8 @@ class PostFormViewModel @AssistedInject constructor(
                     notes = state.notes,
                     url = state.url,
                     image = imagePath, // ← AQUI!
-                    tags = tags
+                    tags = tags,
+                    rating = state.rating
                 )
             } else {
                 repository.insertPostWithTags(
@@ -189,7 +238,8 @@ class PostFormViewModel @AssistedInject constructor(
                     notes = state.notes,
                     url = state.url,
                     image = imagePath, // ← AQUI!
-                    tags = tags
+                    tags = tags,
+                    rating = state.rating
                 )
             }
 

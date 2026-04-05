@@ -13,7 +13,7 @@ import com.agiotagemltda.megusta.data.local.entity.TagsEntity
         TagsEntity::class,
         PostTagCrossRef::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase: RoomDatabase(){

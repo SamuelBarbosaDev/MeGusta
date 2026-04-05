@@ -11,7 +11,11 @@ interface PostFormViewModelContract {
     fun updateImage(image: String)
     fun updateImageUri(uri: Uri?)
     fun updateNotes(notes: String)
+    fun updateRating(newRating: Int)
     fun savePost()
     fun togglePreviewMode()
     fun savePostTogglePreviewMode()
+    fun onNewTagContentChange(newValue: String) // Adicione esta
+    fun toggleTagSelection(tag: String)         // Adicione esta
+    fun addNewTag()
 }
