@@ -10,6 +10,12 @@ import kotlinx.coroutines.flow.Flow
 class PostRepository(private val postDao: PostDao){
     val allPostsFlow: Flow<List<PostWithTags>> = postDao.getAllPostsWithTagsFlow()
 
+    val allASCPostsFlow: Flow<List<PostWithTags>> = postDao.getASCAllPostsWithTagsFlow()
+
+    val allABCPostsFlow: Flow<List<PostWithTags>> = postDao.getABCAllPostsWithTagsFlow()
+
+    val allDescABCPostsFlow: Flow<List<PostWithTags>> = postDao.getDescABCAllPostsWithTagsFlow()
+
     val getAllTagsFlow: Flow<List<String>> = postDao.getAllTagsFlow()
 
     fun getPostByTag(tag: String): Flow<List<PostWithTags>> =

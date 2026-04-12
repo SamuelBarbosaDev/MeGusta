@@ -13,6 +13,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,6 +27,14 @@ class AddPostViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(PostFormUiState())
     override val uiState: StateFlow<PostFormUiState> = _uiState.asStateFlow()
+
+    init{
+        repository.getAllTagsFlow
+            .onEach { tags ->
+                _uiState.update { it.copy(allExistingTags = tags) }
+            }
+            .launchIn(viewModelScope)
+    }
 
     // Métodos da interface
     override fun updateName(name: String) = _uiState.update { it.copy(name = name) }
@@ -69,7 +79,44 @@ class AddPostViewModel @Inject constructor(
     }
 
     override fun savePostTogglePreviewMode() {
-        TODO("Not yet implemented")
+        val state = _uiState.value
+        if (state.name.isBlank()) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            val tags = state.tagsInput.split(",")
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+
+            val imagePath = if (state.imageUri != null) {
+                copyImageToInternalStorage(context, state.imageUri!!) ?: state.image
+            } else {
+                state.image // mantém URL ou caminho antigo
+            }
+
+            if (state.postId > 0) {
+                repository.updatePostWithTags(
+                    postId = state.postId,
+                    name = state.name,
+                    notes = state.notes,
+                    url = state.url,
+                    image = imagePath, // ← AQUI!
+                    tags = tags,
+                    rating = state.rating
+                )
+            } else {
+                repository.insertPostWithTags(
+                    name = state.name,
+                    notes = state.notes,
+                    url = state.url,
+                    image = imagePath, // ← AQUI!
+                    tags = tags,
+                    rating = state.rating
+                )
+            }
+            _uiState.update { it.copy(isLoading = false) }
+        }
     }
     // Atualiza o que o usuário digita no campo de nova tag
     override fun onNewTagContentChange(newValue: String) {

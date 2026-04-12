@@ -17,6 +17,18 @@ interface PostDao{
     @Query("SELECT * FROM posts ORDER BY id DESC")
     fun getAllPostsWithTagsFlow(): Flow<List<PostWithTags>>
 
+    @Transaction
+    @Query("SELECT * FROM posts ORDER BY id ASC")
+    fun getASCAllPostsWithTagsFlow(): Flow<List<PostWithTags>>
+
+    @Transaction
+    @Query("SELECT * FROM posts ORDER BY name ASC")
+    fun getABCAllPostsWithTagsFlow(): Flow<List<PostWithTags>>
+
+    @Transaction
+    @Query("SELECT * FROM posts ORDER BY name DESC")
+    fun getDescABCAllPostsWithTagsFlow(): Flow<List<PostWithTags>>
+
     @Insert
     suspend fun insertPost(post: PostEntity): Long
 
