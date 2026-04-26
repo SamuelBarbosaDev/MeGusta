@@ -67,7 +67,8 @@ class AddPostViewModel @Inject constructor(
                 notes = state.notes,
                 url = state.url,
                 image = imagePath,
-                tags = tags
+                tags = tags,
+                rating = state.rating
             )
 
             _uiState.update { it.copy(isSaved = true, isLoading = false) }
