@@ -15,7 +15,7 @@ interface PostFormViewModelContract {
     fun savePost()
     fun togglePreviewMode()
     fun savePostTogglePreviewMode()
-    fun onNewTagContentChange(newValue: String) // Adicione esta
-    fun toggleTagSelection(tag: String)         // Adicione esta
+    fun onNewTagContentChange(newValue: String)
+    fun toggleTagSelection(tag: String)
     fun addNewTag()
 }

@@ -2,7 +2,6 @@ package com.agiotagemltda.megusta.di
 
 import com.agiotagemltda.megusta.data.local.AppDatabase
 import com.agiotagemltda.megusta.data.local.entity.PostEntity
-import com.agiotagemltda.megusta.di.generatorMovies  // IMPORTA A FUNÇÃO!
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull

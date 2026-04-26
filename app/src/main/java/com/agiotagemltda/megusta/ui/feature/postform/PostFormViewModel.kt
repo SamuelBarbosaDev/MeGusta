@@ -7,24 +7,19 @@ import androidx.lifecycle.viewModelScope
 import com.agiotagemltda.megusta.data.repository.PostRepository
 import com.agiotagemltda.megusta.ui.feature.postform.utils.copyImageToInternalStorage
 import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import dagger.hilt.android.qualifiers.ApplicationContext
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import com.agiotagemltda.megusta.data.local.entity.TagsEntity
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 
 data class PostFormUiState(
@@ -57,13 +52,6 @@ class PostFormViewModel @AssistedInject constructor(
 
     init {
         if (postId > 0) loadPost(postId)
-//        repository.getAllTagsFlow
-//            .onEach { tags ->
-//                _uiState.update {
-//                    it.copy(allAvailableTags = tags)
-//                }
-//            }
-//            .launchIn(viewModelScope)
         repository.getAllTagsFlow
             .onEach { tags ->
                 _uiState.update {
@@ -77,18 +65,6 @@ class PostFormViewModel @AssistedInject constructor(
     interface Factory {
         fun create(postId: Long): PostFormViewModel
     }
-
-//    private fun observeTags() {
-//        viewModelScope.launch {
-//            repository.getAllTagsFlow // Certifique-se que no repositório este Flow retorna List<String>
-//                .catch { e ->
-//                    _uiState.update { it.copy(error = e.message) }
-//                }
-//                .collect { tags ->
-//                    _uiState.update { it.copy(allAvailableTags = tags) }
-//                }
-//        }
-//    }
 
     fun loadPost(postId: Long) {
         if (postId <= 0) return

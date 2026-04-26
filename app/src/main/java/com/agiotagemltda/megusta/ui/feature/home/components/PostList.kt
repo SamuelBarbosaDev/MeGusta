@@ -12,6 +12,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,8 +20,6 @@ import androidx.navigation.NavController
 import com.agiotagemltda.megusta.data.local.entity.PostWithTags
 import com.agiotagemltda.megusta.ui.components.PostCard
 import com.agiotagemltda.megusta.ui.feature.home.HomeViewModel
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
 
 @Composable

@@ -2,8 +2,6 @@ package com.agiotagemltda.megusta.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.agiotagemltda.megusta.data.local.AppDatabase
 import com.agiotagemltda.megusta.data.local.dao.PostDao
 import dagger.Module

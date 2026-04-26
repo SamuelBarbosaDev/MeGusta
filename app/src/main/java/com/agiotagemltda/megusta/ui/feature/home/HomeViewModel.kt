@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.agiotagemltda.megusta.data.local.entity.PostWithTags
 import com.agiotagemltda.megusta.data.repository.PostRepository
+import com.agiotagemltda.megusta.domain.model.PostOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -13,8 +14,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -35,12 +34,7 @@ data class HomeUiState(
     val isSelectionMode: Boolean = false,
     val selectedPostIds: Set<Long> = emptySet(),
     val isNavigating: Boolean = false,
-//    var selectAll: Boolean = false
 )
-
-enum class PostOrder {
-    ID_DESC, ID_ASC, NAME_ASC, NAME_DESC
-}
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -98,12 +92,7 @@ class HomeViewModel @Inject constructor(
             }.flatMapLatest { (order, tag, query) ->
                 _uiState.update { it.copy(isLoading = true, selectedTag = tag) }
 
-                val postsFlow = when (order) {
-                    PostOrder.ID_DESC -> repository.allPostsFlow
-                    PostOrder.ID_ASC -> repository.allASCPostsFlow
-                    PostOrder.NAME_ASC -> repository.allABCPostsFlow
-                    PostOrder.NAME_DESC -> repository.allDescABCPostsFlow
-                }
+                val postsFlow = repository.getPosts(order)
 
                 combine(postsFlow, repository.getAllTagsFlow) { posts, allTags ->
                     // LÓGICA DE FILTRAGEM TRIPLA:
@@ -125,128 +114,6 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-//
-//    @OptIn(ExperimentalCoroutinesApi::class)
-//    private fun observeData() {
-//        viewModelScope.launch {
-//            // Combinamos a ordem e a tag. Se qualquer um mudar, o bloco abaixo roda.
-//            combine(_order, _selectedTag) { order, tag ->
-//                order to tag
-//            }.flatMapLatest { (order, tag) ->
-//                _uiState.update { it.copy(isLoading = true, selectedTag = tag) }
-//
-//                val postsFlow = when (order) {
-//                    PostOrder.ID_DESC -> repository.allPostsFlow
-//                    PostOrder.ID_ASC -> repository.allASCPostsFlow
-//                    PostOrder.NAME_ASC -> repository.allABCPostsFlow
-//                    PostOrder.NAME_DESC -> repository.allDescABCPostsFlow
-//                }
-//
-//                combine(postsFlow, repository.getAllTagsFlow) { posts, allTags ->
-//                    val filtered = if (tag == "Todos") posts
-//                    else posts.filter { p -> p.tag.any { it.name == tag } }
-//                    filtered to allTags
-//                }
-//            }.collect { (posts, allTags) ->
-//                _uiState.update { it.copy(posts = posts, tags = allTags, isLoading = false) }
-//            }
-//        }
-//    }
-
-//    @OptIn(ExperimentalCoroutinesApi::class)
-//    private fun observeData() {
-//        viewModelScope.launch {
-//            _uiState.update { it.copy(isLoading = true) }
-//            // A MÁGICA: flatMapLatest observa o fluxo '_order'.
-//            // Toda vez que '_order' muda, ele descarta o fluxo antigo e assina o novo.
-//            _order.flatMapLatest { selectedOrder ->
-//                val postsFlow = when (selectedOrder) {
-//                    PostOrder.ID_DESC -> repository.allPostsFlow
-//                    PostOrder.ID_ASC -> repository.allASCPostsFlow
-//                    PostOrder.NAME_ASC -> repository.allABCPostsFlow
-//                    PostOrder.NAME_DESC -> repository.allDescABCPostsFlow
-//                }
-//
-//                // Combinamos o fluxo de posts escolhido com o de tags
-//                combine(postsFlow, repository.getAllTagsFlow) { posts, tags ->
-//                    posts to tags
-//                }
-//            }
-//                .catch { e ->
-//                    _uiState.update { it.copy(error = e.message, isLoading = false) }
-//                }
-//                .collect { (posts, tags) ->
-//                    _uiState.update {
-//                        it.copy(posts = posts, tags = tags, isLoading = false)
-//                    }
-//                }
-//        }
-//    }
-
-//    fun setOrder(newOrder: PostOrder) {
-//        if (_order.value == newOrder) return
-//        _order.value = newOrder
-//        observeData() // Reinicia a observação com a nova ordem
-//    }
-//
-//    private fun observeData() {
-//        observeJob?.cancel() // Cancela a observação da ordem anterior
-//        observeJob = viewModelScope.launch {
-//            // Escolhe o Flow correto baseado na ordem selecionada
-//            val postsFlow = when (_order.value) {
-//                PostOrder.ID_DESC -> repository.allPostsFlow
-//                PostOrder.ID_ASC -> repository.allASCPostsFlow
-//                PostOrder.NAME_ASC -> repository.allABCPostsFlow
-//                PostOrder.NAME_DESC -> repository.allDescABCPostsFlow
-//            }
-//
-//            combine(
-//                postsFlow,
-//                repository.getAllTagsFlow
-//            ) { posts, tags ->
-//                _uiState.update {
-//                    it.copy(posts = posts, tags = tags, isLoading = false)
-//                }
-//            }.catch { e ->
-//                _uiState.update { it.copy(error = e.message, isLoading = false) }
-//            }.collect()
-//        }
-//    }
-
-//    private fun observeData() {
-//        viewModelScope.launch {
-//            combine(
-//                repository.allPostsFlow,
-//                repository.getAllTagsFlow  // USE AQUI!
-//            ) { posts, tags ->
-//                _uiState.update {
-//                    it.copy(
-//                        posts = posts,
-//                        tags = tags,
-//                        isLoading = false
-//                    )
-//                }
-//            }
-//                .catch { e ->
-//                    _uiState.update { it.copy(error = e.message, isLoading = false) }
-//                }
-//                .collect()
-//        }
-//    }
-
-//    fun filterByTag(tag: String) {
-//        viewModelScope.launch {
-//            _uiState.update { it.copy(selectedTag = tag, isLoading = true) }
-//            if (tag == "Todos") {
-//                observeData()
-//                return@launch
-//            }
-//            repository.getPostByTag(tag)
-//                .collect { posts ->
-//                    _uiState.update { it.copy(posts = posts, isLoading = false) }
-//                }
-//        }
-//    }
 
     fun onEditPostClicked(postId: Long){
         val now = System.currentTimeMillis()
@@ -292,48 +159,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun selectAllPostsASC(){
-        viewModelScope.launch {
-            combine(
-                repository.allASCPostsFlow,
-                repository.getAllTagsFlow  // USE AQUI!
-            ) { posts, tags ->
-                _uiState.update {
-                    it.copy(
-                        posts = posts,
-                        tags = tags,
-                        isLoading = false
-                    )
-                }
-            }
-                .catch { e ->
-                    _uiState.update { it.copy(error = e.message, isLoading = false) }
-                }
-                .collect()
-        }
-    }
-
-    fun selectAllPostsABC(){
-        viewModelScope.launch {
-            combine(
-                repository.allASCPostsFlow,
-                repository.getAllTagsFlow  // USE AQUI!
-            ) { posts, tags ->
-                _uiState.update {
-                    it.copy(
-                        posts = posts,
-                        tags = tags,
-                        isLoading = false
-                    )
-                }
-            }
-                .catch { e ->
-                    _uiState.update { it.copy(error = e.message, isLoading = false) }
-                }
-                .collect()
-        }
-    }
-
     fun unselectAllPost(){
         _uiState.update { state ->
             state.copy(selectedPostIds = emptySet())
@@ -376,21 +201,4 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
-    fun exportData(uri: android.net.Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val json = repository.exportAllPostsToJson()
-            context.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
-        }
-    }
-
-    fun importData(uri: android.net.Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
-            context.contentResolver.openInputStream(uri)?.use { input ->
-                val json = input.bufferedReader().use { it.readText() }
-                repository.importPostsFromJson(json)
-            }
-        }
-    }
-
 }

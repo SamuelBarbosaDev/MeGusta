@@ -126,19 +126,14 @@ class AddPostViewModel @Inject constructor(
     // Quando o usuário clica em um Chip ou digita e aperta "Enter"
     override fun toggleTagSelection(tag: String) {
         _uiState.update { state ->
-            // Pega as tags atuais (que estão no campo de texto tagsInput separadas por vírgula)
             val currentList = state.tagsInput.split(",")
-                .map { it.trim() }
-                .filter { it.isNotBlank() }
-                .toMutableList()
+                .map { it.trim() }.filter { it.isNotBlank() }.toMutableList()
 
-            if (currentList.contains(tag)) {
-                currentList.remove(tag) // Deseleciona
+            if (currentList.any { it.equals(tag, ignoreCase = true) }) {
+                currentList.removeAll { it.equals(tag, ignoreCase = true) }
             } else {
-                currentList.add(tag) // Seleciona
+                currentList.add(tag)
             }
-
-            // Devolve para o campo de texto formatado
             state.copy(tagsInput = currentList.joinToString(", "))
         }
     }
@@ -152,41 +147,3 @@ class AddPostViewModel @Inject constructor(
         }
     }
 }
-
-//import androidx.lifecycle.ViewModel
-//import androidx.lifecycle.viewModelScope
-//import com.agiotagemltda.megusta.data.repository.PostRepository
-//import dagger.hilt.android.lifecycle.HiltViewModel
-//import kotlinx.coroutines.launch
-//import javax.inject.Inject
-//
-//
-//@HiltViewModel
-//class AddPostViewModel @Inject constructor(
-//    private val repository: PostRepository
-//): ViewModel(){
-//
-//    fun savePost(
-//        name: String,
-//        tagsInput: String,
-//        url: String,
-//        notes: String,
-//        image: String
-//    ){
-//        if(name.isBlank()) return
-//
-//        viewModelScope.launch {
-//            val tags = tagsInput.split(",")
-//                .map { it.trim() }
-//                .filter{it.isNotBlank()}
-//
-//            repository.insertPostWithTags(
-//                name = name,
-//                notes = notes,
-//                url = url,
-//                image = image,
-//                tags = tags
-//            )
-//        }
-//    }
-//}

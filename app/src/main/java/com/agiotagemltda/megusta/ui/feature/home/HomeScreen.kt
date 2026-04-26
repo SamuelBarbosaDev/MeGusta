@@ -1,6 +1,5 @@
 package com.agiotagemltda.megusta.ui.feature.home
 
-import android.R
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,22 +10,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -44,24 +38,24 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.agiotagemltda.megusta.R
 import com.agiotagemltda.megusta.data.local.entity.PostWithTags
 import com.agiotagemltda.megusta.ui.feature.home.components.PostList
 import com.agiotagemltda.megusta.ui.feature.home.components.TagFilterChips
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalFocusManager
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,28 +66,20 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
     val isSelectionMode = uiState.isSelectionMode
     val selectedCount = uiState.selectedPostIds.size
     val searchQuery by viewModel.searchQuery.collectAsState()
-    // ... seus estados atuais ...
     var showOverflowMenu by remember { mutableStateOf(false) }
-    // 1. Launcher para EXPORTAR (Criar documento)
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
         uri?.let { viewModel.writeExportFile(it) }
     }
-
-    // 2. Launcher para IMPORTAR (Abrir documento)
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let { viewModel.readImportFile(it) }
     }
-
-    // Estado local para controlar se a barra de busca está aberta
-    var isSearchActive by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
@@ -125,13 +111,7 @@ fun HomeScreen(
                         }
 
                     },
-//                    navigationIcon = {
-//                        Icon(Icons.Default.Close, "Sair")
-//                    },
                     actions = {
-//                        if (uiState.isSelectionMode){
-
-//                        }
                         if (uiState.posts.isNotEmpty()) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
@@ -158,23 +138,11 @@ fun HomeScreen(
             }
             else{
                 TopAppBar(
-                    title = {
-//                        Text("Me Gusta")
-                            },
+                    title = {},
                     actions = {
                         Row(
                             Modifier.padding(top = 8.dp)
                         ){
-//                            ExpandableSearchBar(
-//                                query = searchQuery,
-//                                onQueryChange = { viewModel.onSearchQueryChanged(it) },
-//                                isSearchVisible = isSearchActive,
-//                                onSearchIconClick = { isSearchActive = true },
-//                                onCloseClick = {
-//                                    isSearchActive = false
-//                                    viewModel.onSearchQueryChanged("") // Limpa a busca ao fechar
-//                                }
-//                            )
                             SearchBarField(
                                 query = searchQuery,
                                 onQueryChange = { viewModel.onSearchQueryChanged(it) },
@@ -188,7 +156,7 @@ fun HomeScreen(
                                     onDismissRequest = { showOverflowMenu = false }
                                 ) {
                                     DropdownMenuItem(
-                                        text = { Text("Exportar Backup (JSON)") },
+                                        text = { Text(text = stringResource(R.string.menu_export)) },
                                         leadingIcon = { Icon(Icons.Default.Share, null) },
                                         onClick = {
                                             showOverflowMenu = false
@@ -196,7 +164,7 @@ fun HomeScreen(
                                         }
                                     )
                                     DropdownMenuItem(
-                                        text = { Text("Importar Backup") },
+                                        text = { Text(text = stringResource(R.string.menu_import)) },
                                         leadingIcon = { Icon(Icons.Default.FileDownload, null) },
                                         onClick = {
                                             showOverflowMenu = false
@@ -243,24 +211,6 @@ fun HomeScreen(
             Modifier
                 .padding(innerPadding)
         ) {
-//            ExpandableSearchBar(
-//                query = searchQuery,
-//                onQueryChange = { viewModel.onSearchQueryChanged(it) },
-//                isSearchVisible = isSearchActive,
-//                onSearchIconClick = { isSearchActive = true },
-//                onCloseClick = {
-//                    isSearchActive = false
-//                    viewModel.onSearchQueryChanged("") // Limpa a busca ao fechar
-//                }
-//            )
-
-//            val searchQuery by viewModel.searchQuery.collectAsState() // Adicione essa variável ao ViewModel
-//
-//            // 2. Campo de Busca
-//            SearchBarField(
-//                query = searchQuery,
-//                onQueryChange = { viewModel.onSearchQueryChanged(it) }
-//            )
             // Filtros por tag
             TagFilterChips(
                 tags = listOf("Todos") + uiState.tags,
@@ -288,9 +238,6 @@ fun SearchBarField(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = Modifier,
-//            .fillMaxWidth()
-//            .padding(horizontal = 16.dp, vertical = 8.dp),
         placeholder = { Text("Buscar por nome ou tag...") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         trailingIcon = {
@@ -317,16 +264,11 @@ fun ExpandableSearchBar(
     onSearchIconClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
-    // Animação suave para expandir/recolher
     AnimatedContent(targetState = isSearchVisible, label = "") { visible ->
         if (visible) {
-            // Barra de busca aberta
             OutlinedTextField(
                 value = query,
                 onValueChange = onQueryChange,
-                modifier = Modifier,
-//                    .fillMaxWidth()
-//                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 placeholder = { Text("Buscar...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
@@ -340,10 +282,8 @@ fun ExpandableSearchBar(
                 singleLine = true
             )
         } else {
-            // Apenas o ícone de lupa (pode ficar alinhado com o TagFilterChips)
             Row(
                 modifier = Modifier
-//                    .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.End
             ) {

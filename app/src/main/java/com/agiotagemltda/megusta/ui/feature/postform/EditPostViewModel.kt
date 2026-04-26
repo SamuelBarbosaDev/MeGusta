@@ -182,12 +182,10 @@ class EditPostViewModel @AssistedInject constructor(
     override fun toggleTagSelection(tag: String) {
         _uiState.update { state ->
             val currentList = state.tagsInput.split(",")
-                .map { it.trim() }
-                .filter { it.isNotBlank() }
-                .toMutableList()
+                .map { it.trim() }.filter { it.isNotBlank() }.toMutableList()
 
-            if (currentList.contains(tag)) {
-                currentList.remove(tag)
+            if (currentList.any { it.equals(tag, ignoreCase = true) }) {
+                currentList.removeAll { it.equals(tag, ignoreCase = true) }
             } else {
                 currentList.add(tag)
             }

@@ -9,23 +9,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -46,10 +40,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -59,39 +51,33 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.room.util.TableInfo
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.agiotagemltda.megusta.R
+import com.agiotagemltda.megusta.ui.components.MeGustaTextField
 import com.agiotagemltda.megusta.ui.feature.home.components.rememberImagePicker
 import com.agiotagemltda.megusta.ui.theme.LinkBlue
-import com.agiotagemltda.megusta.ui.theme.LinkSapphire
 import com.agiotagemltda.megusta.ui.theme.LinkSky
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import java.io.File
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.text.input.ImeAction
-import com.agiotagemltda.megusta.ui.feature.home.components.TagFilterChips
-import kotlinx.coroutines.coroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -205,12 +191,10 @@ fun EditorLayout(
                 onRatingSelected = {viewModel.updateRating(it)}
             )
 
-            OutlinedTextField(
+            MeGustaTextField(
                 value = uiState.name,
                 onValueChange = { viewModel.updateName(it) },
-                label = { Text("Nome") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !uiState.isLoading
+                label = stringResource(R.string.label_name) // Usando strings.xml!
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -220,40 +204,23 @@ fun EditorLayout(
                 viewModel = viewModel
             )
 
-//            OutlinedTextField(
-//                value = uiState.tagsInput,
-//                onValueChange = { viewModel.updateTags(it) },
-//                label = { Text("Tags") },
-//                placeholder = { Text("ex: Ação, Anime, Ficção") },
-//                modifier = Modifier.fillMaxWidth(),
-//                enabled = !uiState.isLoading
-//            )
-//            TagSelector(
-//                currentTags = uiState.tagsInput,
-//                availableTags = uiState.allAvailableTags,
-//                onTagsChange = { viewModel.updateTags(it) },
-//                isEnabled = !uiState.isLoading
-//            )
-
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            MeGustaTextField(
                 value = uiState.url,
                 onValueChange = { viewModel.updateUrl(it) },
-                label = { Text("URL") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !uiState.isLoading
+                label = "URL",
+                placeholder = "https://..."
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            MeGustaTextField(
                 value = uiState.notes,
                 onValueChange = { viewModel.updateNotes(it) },
-                label = { Text("Anotações (Markdown)") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 150.dp)
+                label = "Anotações",
+                singleLine = false,
+                minLines = 5 // Perfeito para o Markdown
             )
 
             if (uiState.isLoading) {
@@ -368,65 +335,6 @@ fun MarkdownPreviewLayout(
         )
     }
 }
-//
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun TagSelector(
-//    currentTags: String,
-//    availableTags: List<String>,
-//    onTagsChange: (String) -> Unit,
-//    isEnabled: Boolean
-//) {
-//    var expanded by remember { mutableStateOf(false) }
-//
-//    // Filtra as sugestões baseadas no que o usuário está digitando (após a última vírgula)
-//    val lastTag = currentTags.split(",").last().trim()
-//    val filteredOptions = availableTags.filter {
-//        it.contains(lastTag, ignoreCase = true) && it.isNotBlank()
-//    }
-//
-//    ExposedDropdownMenuBox(
-//        expanded = expanded && filteredOptions.isNotEmpty(),
-//        onExpandedChange = { expanded = it }
-//    ) {
-//        OutlinedTextField(
-//            value = currentTags,
-//            onValueChange = {
-//                onTagsChange(it)
-//                expanded = true
-//            },
-//            label = { Text("Tags (separe por vírgula)") },
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .menuAnchor(), // Importante para posicionar o menu
-//            enabled = isEnabled,
-//            placeholder = { Text("Ex: Ação, Drama...") }
-//        )
-//
-//        // O Menu de sugestões
-//        ExposedDropdownMenu(
-//            expanded = expanded && filteredOptions.isNotEmpty(),
-//            onDismissRequest = { expanded = false }
-//        ) {
-//            filteredOptions.forEach { selectionOption ->
-//                DropdownMenuItem(
-//                    text = { Text(selectionOption) },
-//                    onClick = {
-//                        // Lógica para adicionar a tag selecionada à lista de strings
-//                        val tagsList = currentTags.split(",").map { it.trim() }.toMutableList()
-//                        if (tagsList.isNotEmpty()) {
-//                            tagsList[tagsList.size - 1] = selectionOption
-//                        } else {
-//                            tagsList.add(selectionOption)
-//                        }
-//                        onTagsChange(tagsList.joinToString(", ") + ", ")
-//                        expanded = false
-//                    }
-//                )
-//            }
-//        }
-//    }
-//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -527,262 +435,58 @@ fun RatingButtons(
     }
 }
 
-//@OptIn(ExperimentalLayoutApi::class)
-//@Composable
-//fun TagSelectorSection(
-//    uiState: PostFormUiState,
-//    onTagClick: (String) -> Unit,
-//    onValueChange: (String) -> Unit,
-//    onAddTag: () -> Unit
-//) {
-//    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-//        Text(
-//            text = "Tags",
-//            style = MaterialTheme.typography.titleMedium,
-//            modifier = Modifier.padding(bottom = 8.dp)
-//        )
-//
-//        // 1. Campo para digitar nova tag
-//        OutlinedTextField(
-//            value = uiState.newTagInput,
-//            onValueChange = onValueChange,
-//            modifier = Modifier.fillMaxWidth(),
-//            placeholder = { Text("Digite uma nova tag...") },
-//            trailingIcon = {
-//                IconButton(onClick = onAddTag) {
-//                    Icon(Icons.Default.Add, contentDescription = "Adicionar Tag")
-//                }
-//            },
-//            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-//            keyboardActions = KeyboardActions(onDone = { onAddTag() }),
-//            singleLine = true
-//        )
-//
-//        Spacer(modifier = Modifier.height(12.dp))
-//
-//        // 2. Grupo de Chips (Sugestões + Selecionadas)
-//        // O FlowRow organiza os itens horizontalmente e pula linha quando necessário
-//        FlowRow(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.spacedBy(8.dp),
-//            verticalArrangement = Arrangement.spacedBy(4.dp)
-//        ) {
-//            uiState.allExistingTags.forEach { tag ->
-//                val isSelected = uiState.tags.contains(tag)
-//
-//                FilterChip(
-//                    selected = isSelected,
-//                    onClick = { onTagClick(tag) },
-//                    label = { Text(tag) },
-//                    leadingIcon = if (isSelected) {
-//                        { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
-//                    } else null,
-//                    colors = FilterChipDefaults.filterChipColors(
-//                        selectedContainerColor = LinkSky.copy(alpha = 0.2f),
-//                        selectedLabelColor = LinkSky
-//                    )
-//                )
-//            }
-//        }
-//    }
-//}
-
-//@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
-//@Composable
-//fun TagSelectorSection(
-//    uiState: PostFormUiState,
-//    viewModel: PostFormViewModelContract
-//) {
-//    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-//        Text("Tags", style = MaterialTheme.typography.titleMedium)
-//        Text(uiState.tagsInput.split(",").toString())
-//
-//        // Campo de entrada de nova tag
-//        OutlinedTextField(
-//            value = uiState.newTagInput,
-//            onValueChange = { viewModel.onNewTagContentChange(it) },
-//            modifier = Modifier.fillMaxWidth(),
-//            placeholder = { Text("Adicionar nova tag...") },
-//            trailingIcon = {
-//                IconButton(onClick = { viewModel.addNewTag() }) {
-//                    Icon(Icons.Default.Add, contentDescription = null)
-//                }
-//            },
-//            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-//            keyboardActions = KeyboardActions(onDone = { viewModel.addNewTag() }),
-//            singleLine = true
-//        )
-//
-//        Spacer(modifier = Modifier.height(8.dp))
-//
-//        // Exibição das tags existentes (FlowRow faz quebrar a linha automaticamente)
-//        FlowRow(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            uiState.allExistingTags.forEach { tagName ->
-//                // Verifica se a tag já está na lista de selecionadas
-//                val isSelected = uiState.tagsInput.split(",")
-//                    .map { it.trim() }
-//                    .contains(tagName.trim()) // Garante que "Ação" seja igual a "Ação"
-//
-//                FilterChip(
-//                    selected = isSelected,
-//                    onClick = { viewModel.toggleTagSelection(tagName) },
-//                    label = { Text(tagName) },
-//                    leadingIcon = if (isSelected) {
-//                        { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-//                    } else null
-//                )
-//            }
-//        }
-//    }
-//}
-
-//@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
-//@Composable
-//fun TagSelectorSection(
-//    uiState: PostFormUiState,
-//    viewModel: PostFormViewModelContract
-//) {
-//    // 1. Criamos uma lista "ao vivo" de tags selecionadas baseada no campo de texto
-//    val selectedTagsList = remember(uiState.tagsInput) {
-//        uiState.tagsInput.split(",")
-//            .map { it.trim() }
-//            .filter { it.isNotBlank() }
-//    }
-//
-//    // 2. Combinamos as tags que já existem no banco com as que o usuário acabou de digitar
-//    // O Set garante que não apareçam nomes duplicados
-//    val allTagsToShow = remember(uiState.allExistingTags, selectedTagsList) {
-//        (uiState.allExistingTags + selectedTagsList).distinct().sorted()
-//    }
-//
-//    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-//        Text("Tags", style = MaterialTheme.typography.titleMedium)
-//
-//        OutlinedTextField(
-//            value = uiState.newTagInput,
-//            onValueChange = { viewModel.onNewTagContentChange(it) },
-//            modifier = Modifier.fillMaxWidth(),
-//            placeholder = { Text("Adicionar nova tag...") },
-//            trailingIcon = {
-//                IconButton(onClick = { viewModel.addNewTag() }) {
-//                    Icon(Icons.Default.Add, contentDescription = null)
-//                }
-//            },
-//            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-//            keyboardActions = KeyboardActions(onDone = { viewModel.addNewTag() }),
-//            singleLine = true
-//        )
-//
-//        Spacer(modifier = Modifier.height(12.dp))
-//
-//        // Exibição dos Chips
-//        FlowRow(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.spacedBy(8.dp),
-//            verticalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            allTagsToShow.forEach { tagName ->
-//                val isSelected = selectedTagsList.contains(tagName)
-//
-//                FilterChip(
-//                    selected = isSelected,
-//                    onClick = { viewModel.toggleTagSelection(tagName) },
-//                    label = { Text(tagName) },
-//                    leadingIcon = if (isSelected) {
-//                        { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-//                    } else null,
-//                    colors = FilterChipDefaults.filterChipColors(
-//                        selectedContainerColor = LinkSky.copy(alpha = 0.2f),
-//                        selectedLabelColor = LinkSky
-//                    )
-//                )
-//            }
-//        }
-//    }
-//}
-
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun TagSelectorSection(
-    uiState: PostFormUiState,
-    viewModel: PostFormViewModelContract
-) {
-    // 1. Estado local para controlar se a lista está aberta ou fechada
+fun TagSelectorSection(uiState: PostFormUiState, viewModel: PostFormViewModelContract) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    val selectedTagsList = remember(uiState.tagsInput) {
-        uiState.tagsInput.split(",")
-            .map { it.trim() }
-            .filter { it.isNotBlank() }
-    }
+    // Pegamos o que está escrito agora no post
+    val currentPostTags = uiState.tagsInput.split(",").map { it.trim() }.filter { it.isNotBlank() }
 
-    val allTagsToShow = remember(uiState.allExistingTags, selectedTagsList) {
-        (uiState.allExistingTags + selectedTagsList).distinct().sorted()
-    }
+    // Unimos as tags globais do banco com as que o usuário acabou de digitar para garantir que apareçam
+    val allTagsToShow = (uiState.allExistingTags + currentPostTags).distinct().sortedBy { it.lowercase() }
 
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        // Cabeçalho com Título e Botão de Alternar
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text("Tags", style = MaterialTheme.typography.titleMedium)
-
-            // Botão para mostrar/ocultar
             IconButton(onClick = { isExpanded = !isExpanded }) {
-                Icon(
-                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = if (isExpanded) "Ocultar" else "Mostrar"
-                )
+                Icon(if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, null)
             }
         }
 
-        // Campo de entrada de nova tag (sempre visível para facilitar a adição rápida)
         OutlinedTextField(
             value = uiState.newTagInput,
             onValueChange = { viewModel.onNewTagContentChange(it) },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Adicionar nova tag...") },
+            placeholder = { Text("Nova tag...") },
             trailingIcon = {
-                IconButton(onClick = { viewModel.addNewTag() }) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                }
+                IconButton(onClick = { viewModel.addNewTag() }) { Icon(Icons.Default.Add, null) }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { viewModel.addNewTag() }),
             singleLine = true
         )
 
-        // 2. Animação de visibilidade: os Chips só aparecem se isExpanded for true
         AnimatedVisibility(visible = isExpanded) {
-            Column {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    allTagsToShow.forEach { tagName ->
-                        val isSelected = selectedTagsList.contains(tagName)
-
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = { viewModel.toggleTagSelection(tagName) },
-                            label = { Text(tagName) },
-                            leadingIcon = if (isSelected) {
-                                { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
-                            } else null,
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = LinkSky.copy(alpha = 0.2f),
-                                selectedLabelColor = LinkSky
-                            )
-                        )
-                    }
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                allTagsToShow.forEach { tagName ->
+                    val isSelected = currentPostTags.any { it.equals(tagName, ignoreCase = true) }
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { viewModel.toggleTagSelection(tagName) },
+                        label = { Text(tagName) },
+                        leadingIcon = if (isSelected) {
+                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                        } else null
+                    )
                 }
             }
         }

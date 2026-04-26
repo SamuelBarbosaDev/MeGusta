@@ -4,19 +4,21 @@ import com.agiotagemltda.megusta.data.local.dao.PostDao
 import com.agiotagemltda.megusta.data.local.entity.PostEntity
 import com.agiotagemltda.megusta.data.local.entity.PostWithTags
 import com.agiotagemltda.megusta.data.local.entity.TagsEntity
+import com.agiotagemltda.megusta.domain.model.PostOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 
 class PostRepository(private val postDao: PostDao){
-    val allPostsFlow: Flow<List<PostWithTags>> = postDao.getAllPostsWithTagsFlow()
-
-    val allASCPostsFlow: Flow<List<PostWithTags>> = postDao.getASCAllPostsWithTagsFlow()
-
-    val allABCPostsFlow: Flow<List<PostWithTags>> = postDao.getABCAllPostsWithTagsFlow()
-
-    val allDescABCPostsFlow: Flow<List<PostWithTags>> = postDao.getDescABCAllPostsWithTagsFlow()
+    fun getPosts(order: PostOrder): Flow<List<PostWithTags>> {
+        return when (order) {
+            PostOrder.ID_DESC -> postDao.getAllPostsWithTagsFlow()
+            PostOrder.ID_ASC -> postDao.getASCAllPostsWithTagsFlow()
+            PostOrder.NAME_ASC -> postDao.getABCAllPostsWithTagsFlow()
+            PostOrder.NAME_DESC -> postDao.getDescABCAllPostsWithTagsFlow()
+        }
+    }
 
     val getAllTagsFlow: Flow<List<String>> = postDao.getAllTagsFlow()
 
