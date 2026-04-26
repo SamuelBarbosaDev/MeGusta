@@ -1,10 +1,13 @@
 package com.agiotagemltda.megusta.ui.feature.home
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.agiotagemltda.megusta.data.local.entity.PostWithTags
 import com.agiotagemltda.megusta.data.repository.PostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +44,8 @@ enum class PostOrder {
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: PostRepository
+    private val repository: PostRepository,
+    @ApplicationContext private val context: android.content.Context // Adicione isso
 ) : ViewModel() {
     // Estados privados para controlar a lógica
     private val _order = MutableStateFlow(PostOrder.ID_DESC)
@@ -354,4 +358,39 @@ class HomeViewModel @Inject constructor(
             observeData()
         }
     }
+
+    fun writeExportFile(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val json = repository.exportAllPostsToJson()
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(json.toByteArray())
+            }
+        }
+    }
+
+    fun readImportFile(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val json = inputStream.bufferedReader().use { it.readText() }
+                repository.importPostsFromJson(json)
+            }
+        }
+    }
+
+    fun exportData(uri: android.net.Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val json = repository.exportAllPostsToJson()
+            context.contentResolver.openOutputStream(uri)?.use { it.write(json.toByteArray()) }
+        }
+    }
+
+    fun importData(uri: android.net.Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                val json = input.bufferedReader().use { it.readText() }
+                repository.importPostsFromJson(json)
+            }
+        }
+    }
+
 }

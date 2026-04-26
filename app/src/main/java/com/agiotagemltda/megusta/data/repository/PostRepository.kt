@@ -5,6 +5,8 @@ import com.agiotagemltda.megusta.data.local.entity.PostEntity
 import com.agiotagemltda.megusta.data.local.entity.PostWithTags
 import com.agiotagemltda.megusta.data.local.entity.TagsEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 
 class PostRepository(private val postDao: PostDao){
@@ -66,4 +68,18 @@ class PostRepository(private val postDao: PostDao){
 
     fun getAllTagsWithIdFlow(): Flow<List<TagsEntity>> =
         postDao.getAllTagsWithIdFLow()
+
+    suspend fun exportAllPostsToJson(): String {
+        val allData = postDao.getAllPostsWithTagsStatic()
+        return Json.encodeToString(allData)
+    }
+
+    suspend fun importPostsFromJson(jsonString: String) {
+        val data = Json.decodeFromString<List<PostWithTags>>(jsonString)
+        data.forEach { item ->
+            // Criamos um novo PostEntity baseado no importado (para gerar novo ID e não conflitar)
+            val postToInsert = item.post.copy(id = 0)
+            postDao.insertPostWithTags(postToInsert, item.tag.map { it.name })
+        }
+    }
 }

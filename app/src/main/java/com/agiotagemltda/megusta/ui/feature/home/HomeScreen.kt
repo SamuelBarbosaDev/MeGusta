@@ -2,7 +2,10 @@ package com.agiotagemltda.megusta.ui.feature.home
 
 import android.R
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +20,11 @@ import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -54,6 +60,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.serialization.json.Json
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,10 +71,26 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val isSelectionMode = uiState.isSelectionMode
     val selectedCount = uiState.selectedPostIds.size
     val searchQuery by viewModel.searchQuery.collectAsState()
+    // ... seus estados atuais ...
+    var showOverflowMenu by remember { mutableStateOf(false) }
+    // 1. Launcher para EXPORTAR (Criar documento)
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri?.let { viewModel.writeExportFile(it) }
+    }
+
+    // 2. Launcher para IMPORTAR (Abrir documento)
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { viewModel.readImportFile(it) }
+    }
 
     // Estado local para controlar se a barra de busca está aberta
     var isSearchActive by remember { mutableStateOf(false) }
@@ -132,6 +156,59 @@ fun HomeScreen(
 
                 )
             }
+            else{
+                TopAppBar(
+                    title = {
+//                        Text("Me Gusta")
+                            },
+                    actions = {
+                        Row(
+                            Modifier.padding(top = 8.dp)
+                        ){
+//                            ExpandableSearchBar(
+//                                query = searchQuery,
+//                                onQueryChange = { viewModel.onSearchQueryChanged(it) },
+//                                isSearchVisible = isSearchActive,
+//                                onSearchIconClick = { isSearchActive = true },
+//                                onCloseClick = {
+//                                    isSearchActive = false
+//                                    viewModel.onSearchQueryChanged("") // Limpa a busca ao fechar
+//                                }
+//                            )
+                            SearchBarField(
+                                query = searchQuery,
+                                onQueryChange = { viewModel.onSearchQueryChanged(it) },
+                            )
+                            Box {
+                                IconButton(onClick = { showOverflowMenu = true }) {
+                                    Icon(Icons.Default.MoreVert, contentDescription = "Mais opções")
+                                }
+                                DropdownMenu(
+                                    expanded = showOverflowMenu,
+                                    onDismissRequest = { showOverflowMenu = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Exportar Backup (JSON)") },
+                                        leadingIcon = { Icon(Icons.Default.Share, null) },
+                                        onClick = {
+                                            showOverflowMenu = false
+                                            exportLauncher.launch("me_gusta_backup.json")
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Importar Backup") },
+                                        leadingIcon = { Icon(Icons.Default.FileDownload, null) },
+                                        onClick = {
+                                            showOverflowMenu = false
+                                            importLauncher.launch("application/json")
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                )
+            }
 
         },
         floatingActionButton = {
@@ -157,21 +234,26 @@ fun HomeScreen(
         },
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus() // <- Isso remove o foco e fecha o teclado
+                })}
     ) { innerPadding ->
         Column(
             Modifier
                 .padding(innerPadding)
         ) {
-            ExpandableSearchBar(
-                query = searchQuery,
-                onQueryChange = { viewModel.onSearchQueryChanged(it) },
-                isSearchVisible = isSearchActive,
-                onSearchIconClick = { isSearchActive = true },
-                onCloseClick = {
-                    isSearchActive = false
-                    viewModel.onSearchQueryChanged("") // Limpa a busca ao fechar
-                }
-            )
+//            ExpandableSearchBar(
+//                query = searchQuery,
+//                onQueryChange = { viewModel.onSearchQueryChanged(it) },
+//                isSearchVisible = isSearchActive,
+//                onSearchIconClick = { isSearchActive = true },
+//                onCloseClick = {
+//                    isSearchActive = false
+//                    viewModel.onSearchQueryChanged("") // Limpa a busca ao fechar
+//                }
+//            )
+
 //            val searchQuery by viewModel.searchQuery.collectAsState() // Adicione essa variável ao ViewModel
 //
 //            // 2. Campo de Busca
@@ -206,9 +288,9 @@ fun SearchBarField(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier,
+//            .fillMaxWidth()
+//            .padding(horizontal = 16.dp, vertical = 8.dp),
         placeholder = { Text("Buscar por nome ou tag...") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         trailingIcon = {
@@ -242,9 +324,9 @@ fun ExpandableSearchBar(
             OutlinedTextField(
                 value = query,
                 onValueChange = onQueryChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier,
+//                    .fillMaxWidth()
+//                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 placeholder = { Text("Buscar...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
@@ -260,7 +342,9 @@ fun ExpandableSearchBar(
         } else {
             // Apenas o ícone de lupa (pode ficar alinhado com o TagFilterChips)
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                modifier = Modifier
+//                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.End
             ) {
                 IconButton(onClick = onSearchIconClick) {

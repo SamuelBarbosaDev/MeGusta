@@ -116,4 +116,8 @@ interface PostDao{
 
     @Query("SELECT * FROM tags ORDER BY name ASC")
     fun getAllTagsWithIdFLow(): Flow<List<TagsEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM posts")
+    suspend fun getAllPostsWithTagsStatic(): List<PostWithTags>
 }
