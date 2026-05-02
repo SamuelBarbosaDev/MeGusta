@@ -70,16 +70,29 @@ fun HomeScreen(
     val selectedCount = uiState.selectedPostIds.size
     val searchQuery by viewModel.searchQuery.collectAsState()
     var showOverflowMenu by remember { mutableStateOf(false) }
+//    val exportLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.CreateDocument("application/json")
+//    ) { uri ->
+//        uri?.let { viewModel.writeExportFile(it) }
+//    }
+//    val importLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.GetContent()
+//    ) { uri ->
+//        uri?.let { viewModel.readImportFile(it) }
+//    }
+    // Launcher para EXPORTAR
     val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json")
-    ) { uri ->
-        uri?.let { viewModel.writeExportFile(it) }
-    }
+        contract = ActivityResultContracts.CreateDocument("application/zip")
+    ) { uri -> uri?.let { viewModel.exportBackup(it) } }
+
+    // Launcher para IMPORTAR
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let { viewModel.readImportFile(it) }
-    }
+    ) { uri -> uri?.let { viewModel.importBackup(it) } }
+
+    // No DropdownMenuItem, mude os textos para:
+    // "Exportar Backup Completo (.zip)"
+    // "Importar Backup Completo"
 
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
@@ -160,7 +173,8 @@ fun HomeScreen(
                                         leadingIcon = { Icon(Icons.Default.Share, null) },
                                         onClick = {
                                             showOverflowMenu = false
-                                            exportLauncher.launch("me_gusta_backup.json")
+                                            exportLauncher.launch("me_gusta_backup.zip")
+//                                            exportLauncher.launch("me_gusta_backup.json")
                                         }
                                     )
                                     DropdownMenuItem(
@@ -168,7 +182,8 @@ fun HomeScreen(
                                         leadingIcon = { Icon(Icons.Default.FileDownload, null) },
                                         onClick = {
                                             showOverflowMenu = false
-                                            importLauncher.launch("application/json")
+                                            importLauncher.launch("application/zip")
+//                                            importLauncher.launch("application/json")
                                         }
                                     )
                                 }

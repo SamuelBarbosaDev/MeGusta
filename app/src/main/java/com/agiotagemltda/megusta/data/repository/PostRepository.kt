@@ -1,5 +1,6 @@
 package com.agiotagemltda.megusta.data.repository
 
+import android.content.Context
 import com.agiotagemltda.megusta.data.local.dao.PostDao
 import com.agiotagemltda.megusta.data.local.entity.PostEntity
 import com.agiotagemltda.megusta.data.local.entity.PostWithTags
@@ -8,6 +9,10 @@ import com.agiotagemltda.megusta.domain.model.PostOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.File
+import java.io.InputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 
 
 class PostRepository(private val postDao: PostDao){
@@ -82,6 +87,49 @@ class PostRepository(private val postDao: PostDao){
             // Criamos um novo PostEntity baseado no importado (para gerar novo ID e não conflitar)
             val postToInsert = item.post.copy(id = 0)
             postDao.insertPostWithTags(postToInsert, item.tag.map { it.name })
+        }
+    }
+
+    suspend fun importFromZip(inputStream: InputStream, context: Context) {
+        val zipInputStream = ZipInputStream(inputStream)
+        var entry: ZipEntry? = zipInputStream.getNextEntry()
+        var jsonContent = ""
+        val imageMap = mutableMapOf<String, ByteArray>()
+
+        while (entry != null) {
+            when {
+                entry.name == "backup.json" -> {
+                    jsonContent = zipInputStream.bufferedReader().readText()
+                }
+                entry.name.startsWith("images/") -> {
+                    val fileName = entry.name.removePrefix("images/")
+                    if (fileName.isNotEmpty()) {
+                        imageMap[fileName] = zipInputStream.readBytes()
+                    }
+                }
+            }
+            zipInputStream.closeEntry()
+            entry = zipInputStream.getNextEntry()
+        }
+
+        if (jsonContent.isNotEmpty()) {
+            val data = Json.decodeFromString<List<PostWithTags>>(jsonContent)
+            val imagesDir = File(context.filesDir, "images").apply { mkdirs() }
+
+            data.forEach { item ->
+                // Recupera a imagem do mapa e salva no disco interno do novo aparelho
+                val oldPath = item.post.image
+                val fileName = oldPath.substringAfterLast("/")
+
+                val newImagePath = imageMap[fileName]?.let { bytes ->
+                    val newFile = File(imagesDir, fileName)
+                    newFile.writeBytes(bytes)
+                    newFile.absolutePath
+                } ?: ""
+
+                val postToInsert = item.post.copy(id = 0, image = newImagePath)
+                postDao.insertPostWithTags(postToInsert, item.tag.map { it.name })
+            }
         }
     }
 }

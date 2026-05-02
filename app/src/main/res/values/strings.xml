@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">Me Gusta</string>
+
+    <string name="search_placeholder">Buscar por nome ou tag...</string>
+    <string name="menu_export">Exportar Backup (ZIP)</string>
+    <string name="menu_import">Importar Backup</string>
+    <string name="all_tags">Todos</string>
+    <string name="sort_recent">Mais recentes</string>
+    <string name="sort_old">Mais antigos</string>
+    <string name="sort_az">Nome (A-Z)</string>
+    <string name="sort_za">Nome (Z-A)</string>
+    <string name="empty_list">Nenhuma tag criada ainda</string>
+    <string name="selected_count">%1$d Selecionado(s)</string>
+
+    <string name="title_new_post">Novo Post</string>
+    <string name="title_edit_post">Editar</string>
+    <string name="title_preview">Visualização</string>
+    <string name="label_name">Nome</string>
+    <string name="label_url">URL</string>
+    <string name="label_notes">Anotações (Markdown)</string>
+    <string name="label_tags">Tags</string>
+    <string name="placeholder_new_tag">Adicionar nova tag...</string>
+    <string name="image_picker_hint">Toque para selecionar imagem</string>
+    <string name="no_notes">Nenhuma anotação disponível.</string>
+
+    <string name="action_save">Salvar</string>
+    <string name="action_delete">Excluir</string>
+    <string name="action_close">Fechar</string>
+    <string name="action_exit">Sair</string>
 </resources>

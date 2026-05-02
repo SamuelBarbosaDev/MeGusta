@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.agiotagemltda.megusta.data.local.entity.PostWithTags
 import com.agiotagemltda.megusta.data.repository.PostRepository
 import com.agiotagemltda.megusta.domain.model.PostOrder
+import com.agiotagemltda.megusta.ui.feature.home.utils.zipProject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 
@@ -199,6 +201,28 @@ class HomeViewModel @Inject constructor(
                 val json = inputStream.bufferedReader().use { it.readText() }
                 repository.importPostsFromJson(json)
             }
+        }
+    }
+
+    // No HomeViewModel.kt
+
+    fun exportBackup(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val json = repository.exportAllPostsToJson()
+            val imageFolder = File(context.filesDir, "images")
+
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                zipProject(json, imageFolder, outputStream)
+            }
+        }
+    }
+
+    fun importBackup(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                repository.importFromZip(inputStream, context)
+            }
+            observeData() // Recarrega a lista
         }
     }
 }
